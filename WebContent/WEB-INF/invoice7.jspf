@@ -1,0 +1,46 @@
+<%@ page pageEncoding="UTF-8" %>
+<%-- Mẫu hóa đơn nhập dùng chung cho importBill7.jsp và doSaveImportBill7.jsp.
+     Trang gọi cần có biến: bill (ImportBill7), invoiceNo (String, rỗng khi chưa lưu). --%>
+<%
+    java.util.Calendar cal = java.util.Calendar.getInstance();
+    cal.setTime(bill.getImportDate());
+    String webUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+%>
+<div class="invoice">
+    <div class="inv-shop">
+        <div class="inv-name">TRUNG TÂM DỊCH VỤ/PHỤ TÙNG HIẾU BÉO</div>
+        <div>Địa chỉ: Bắc Giang</div>
+        <div>Điện thoại: <span class="red">0981752487</span></div>
+        <div>Website: <%= esc(webUrl) %></div>
+    </div>
+    <div class="inv-title">
+        <h1>HÓA ĐƠN NHẬP</h1>
+        <span class="inv-no">Số: <span class="red"><%= invoiceNo %></span></span>
+    </div>
+    <div class="inv-line"><span>Nhà cung cấp:</span><span class="dots"><%= esc(bill.getSupplier().getName()) %></span>
+        <span>Điện thoại:</span><span class="dots short"><%= esc(bill.getSupplier().getTel()) %></span></div>
+    <div class="inv-line"><span>Địa chỉ:</span><span class="dots"><%= esc(bill.getSupplier().getAddress()) %></span></div>
+    <table class="inv-table">
+        <tr><th style="width:6%">STT</th><th>Tên sản phẩm</th><th style="width:8%">SL</th>
+            <th style="width:16%">Đơn giá</th><th style="width:18%">Thành tiền</th></tr>
+        <% int rows = Math.max(10, bill.getImportedParts().size());
+           for (int i = 0; i < rows; i++) {
+               if (i < bill.getImportedParts().size()) { model.ImportedPart7 p = bill.getImportedParts().get(i); %>
+        <tr><td class="c"><%= i + 1 %></td><td><%= esc(p.getSparePart().getName()) %></td>
+            <td class="c"><%= p.getQuantity() %></td><td class="r"><%= money(p.getPrice()) %></td>
+            <td class="r"><%= money(p.getQuantity() * p.getPrice()) %></td></tr>
+        <%     } else { %>
+        <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td></tr>
+        <%     }
+           } %>
+        <tr class="sum"><td colspan="4"><b>Tổng cộng:</b></td><td class="r"><b><%= money(bill.getTotalAmount()) %></b></td></tr>
+        <tr class="sum"><td colspan="5"><b>Số tiền bằng chữ:</b> <i><%= moneyInWords(bill.getTotalAmount()) %></i></td></tr>
+    </table>
+    <p class="inv-note">Phụ tùng được nhập kho theo đúng số lượng và đơn giá ghi trên hóa đơn.</p>
+    <p class="inv-date">Bắc Giang, ngày <%= cal.get(java.util.Calendar.DAY_OF_MONTH) %> tháng <%= cal.get(java.util.Calendar.MONTH) + 1 %> năm <%= cal.get(java.util.Calendar.YEAR) %></p>
+    <div class="inv-sign">
+        <div><b>Nhà cung cấp</b><br><i>(Ký, ghi rõ họ tên)</i></div>
+        <div><b>Nhân viên kho</b><br><i>(Ký, ghi rõ họ tên)</i><br><br><br><%= esc(bill.getStorekeeper().getFullName()) %></div>
+    </div>
+    <div class="inv-foot">Chăm xe như chăm chính bạn</div>
+</div>

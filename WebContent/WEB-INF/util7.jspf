@@ -1,0 +1,50 @@
+<%@ page pageEncoding="UTF-8" %>
+<%!
+    // escape dữ liệu người dùng nhập trước khi in ra HTML
+    String esc(String s) {
+        if (s == null) return "";
+        return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");
+    }
+
+    String money(float v) {
+        return String.format("%,.0f", v).replace(',', '.') + " đ";
+    }
+
+    // đọc 3 chữ số; full = true khi phía trước còn nhóm khác (phải đọc "không trăm", "lẻ")
+    String readThree(int n, boolean full) {
+        String[] d = {"không", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín"};
+        int h = n / 100, t = n / 10 % 10, u = n % 10;
+        StringBuilder s = new StringBuilder();
+        if (full || h > 0) s.append(d[h]).append(" trăm");
+        if (t == 0) {
+            if (u > 0 && s.length() > 0) s.append(" lẻ");
+        } else if (t == 1) {
+            s.append(" mười");
+        } else {
+            s.append(" ").append(d[t]).append(" mươi");
+        }
+        if (u > 0) {
+            if (u == 1 && t > 1) s.append(" mốt");
+            else if (u == 5 && t > 0) s.append(" lăm");
+            else s.append(" ").append(d[u]);
+        }
+        return s.toString().trim();
+    }
+
+    // số tiền bằng chữ, ví dụ 1400000 -> "Một triệu bốn trăm nghìn đồng"
+    String moneyInWords(float v) {
+        long n = Math.round(v);
+        if (n == 0) return "Không đồng";
+        String[] unit = {"", " nghìn", " triệu", " tỷ"};
+        java.util.List<Integer> groups = new java.util.ArrayList<Integer>();
+        for (long x = n; x > 0; x /= 1000) groups.add((int) (x % 1000));
+        StringBuilder s = new StringBuilder();
+        for (int i = groups.size() - 1; i >= 0; i--) {
+            int g = groups.get(i);
+            if (g == 0) continue;
+            s.append(" ").append(readThree(g, i < groups.size() - 1)).append(unit[Math.min(i, 3)]);
+        }
+        String r = s.toString().trim();
+        return Character.toUpperCase(r.charAt(0)) + r.substring(1) + " đồng";
+    }
+%>
